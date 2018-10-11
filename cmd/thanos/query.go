@@ -18,6 +18,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/improbable-eng/thanos/pkg/cluster"
+	"github.com/improbable-eng/thanos/pkg/dns"
 	"github.com/improbable-eng/thanos/pkg/query"
 	"github.com/improbable-eng/thanos/pkg/query/api"
 	"github.com/improbable-eng/thanos/pkg/runutil"
@@ -253,6 +254,8 @@ func runQuery(
 	}
 
 	fileSDCache := newFileSDCache()
+	// DNS discoverer with default resolver
+	dnsDiscoverer := dns.NewServiceDiscoverer(nil)
 
 	var (
 		stores = query.NewStoreSet(
@@ -330,7 +333,6 @@ func runQuery(
 					if update == nil {
 						continue
 					}
-					// TODO(ivan): resolve dns here maybe?
 					fileSDCache.update(update)
 					stores.Update(ctxUpdate)
 				case <-ctxUpdate.Done():
